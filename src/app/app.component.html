@@ -1,20 +1,76 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{title}}!
-  </h1>
-  <img width="300" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
+<clr-dropdown>
+  <button type="button" class="btn btn-link" clrDropdownTrigger [disabled]="!dropzone.enabled">
+    {{libText()}}
+    <clr-icon shape="caret down"></clr-icon>
+  </button>
+  <clr-dropdown-menu *clrIfOpen>
+    <button type="button" clrDropdownItem *ngFor="let x of libs" (click)="settings.libId = x.id; dropzone.resubmit();">
+      {{x.text}}
+    </button>
+  </clr-dropdown-menu>
+</clr-dropdown>
 
+<clr-checkbox [clrInline]="true" [(clrChecked)]="settings.fixFillType" (clrCheckedChange)="dropzone.resubmit()"
+              [clrDisabled]="!dropzone.enabled">
+  Fix fill type
+  <a href="https://github.com/a-student/SvgToVectorDrawableConverter#not-supported-svg-features" target="_blank"
+     class="tooltip">
+    <clr-icon shape="help"></clr-icon>
+    <span class="tooltip-content">
+      Rebuild paths in such a way that rendering with any fill-rule leads to the same result.
+    </span>
+  </a>
+</clr-checkbox>
+
+<app-dropzone #dropzone (sending)="sending($event)" (restart)="restart()"></app-dropzone>
+
+<button class="btn btn-sm" (click)="dropzone.reset()" [disabled]="!dropzone.enabled">
+  <clr-icon shape="undo"></clr-icon>
+  Reset
+</button>
+
+<div class="card" [@slideTop]="cardState">
+  <div class="card-block">
+    <div class="progress-{{progressStateEnum[progressState] | lowercase}}">
+      <div *ngIf="!isProgressRunning; else runningProgress" class="progress-static top">
+        <div class="progress-meter" data-value="100"></div>
+      </div>
+      <ng-template #runningProgress>
+        <div class="progress loop top"><progress value="0"></progress></div>
+      </ng-template>
+    </div>
+    <div class="card-title">{{cardTitle}}</div>
+    <div class="card-text pre-wrap" [innerHTML]="cardText | cardTextBeautify" #cardTextContainer></div>
+  </div>
+  <div class="card-footer" [hidden]="!canAbortConversion && !canRetryConversion && !zipBlob">
+    <button class="btn btn-sm btn-link"
+            (click)="abortConversionModalOpen = true" [hidden]="!canAbortConversion">
+      <clr-icon shape="times"></clr-icon>
+      Abort
+    </button>
+    <button class="btn btn-primary"
+            (click)="dropzone.resubmit()" [hidden]="!canRetryConversion">
+      <clr-icon shape="refresh"></clr-icon>
+      {{retryButtonText}}
+    </button>
+    <button class="btn btn-primary" [class.btn-success]="progressState === progressStateEnum.Success"
+            (click)="saveZip()" [hidden]="!zipBlob">
+      <clr-icon shape="download"></clr-icon>
+      {{fileCount > 1 ? 'Save ZIP with ' + fileCount + ' vector drawables' : fileCount === 1 ? 'Save ZIP with 1 vector drawable' : 'Save ZIP'}}
+    </button>
+  </div>
+</div>
+
+<clr-modal [(clrModalOpen)]="abortConversionModalOpen">
+  <h3 class="modal-title">Abort conversion</h3>
+  <div class="modal-body">
+    <p>Are you sure you want to abort the conversion?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="abortConversionModalOpen = false">No, close this</button>
+    <button type="button" class="btn btn-danger" (click)="dropzone.cancel()">Yes, abort conversion</button>
+  </div>
+</clr-modal>
+
+<app-xml-view [title]="singleFileTitle" [xml]="singleFileXml" [@slideTop]="xmlViewState">
+</app-xml-view>

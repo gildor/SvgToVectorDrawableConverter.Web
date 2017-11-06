@@ -1,0 +1,33 @@
+<div class="card">
+  <div class="card-block">
+    <div class="card-title">{{title}}</div>
+    <div class="card-text" *ngIf="hidePreview; else xmlPreview">
+      Code preview is hidden because the text is too large.
+      <button class="btn btn-sm btn-warning-outline" (click)="hidePreview = false">
+        <clr-icon shape="eye"></clr-icon>
+        Show anyway
+      </button>
+    </div>
+    <ng-template #xmlPreview>
+      <pre class="resizable"><code clr-code-highlight="language-xml" appCodeHighlightAutoredraw
+                                   [textContent]="xml"></code></pre>
+    </ng-template>
+  </div>
+  <div class="card-footer">
+    <div class="flex">
+      <button class="btn btn-link" (click)="saveToFile()">
+        <clr-icon shape="export"></clr-icon>
+        Save to file
+      </button>
+      <button class="btn btn-link" (click)="copyCode()">
+        <clr-icon shape="copy"></clr-icon>
+        Copy code
+      </button>
+      <clr-alert [clrAlertSizeSmall]="true" [clrAlertClosable]="false" [@alertState]="copyCodeAlertState">
+        <div class="alert-item">
+          <span class="alert-text text-nowrap">Code has been copied to clipboard.</span>
+        </div>
+      </clr-alert>
+    </div>
+  </div>
+</div>

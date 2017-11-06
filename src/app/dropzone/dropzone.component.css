@@ -1,0 +1,34 @@
+.dropzone {
+  border: 2px dashed #ccc;
+  border-radius: .125rem;
+  background-color: #eee;
+
+  max-height: 50vh;
+  resize: vertical;
+  overflow: auto;
+}
+
+.dropzone .dz-preview.dz-image-preview {
+  background: none;
+}
+
+.dropzone .dz-preview .dz-image {
+  border-radius: 0;
+}
+
+.dropzone .dz-preview:hover .dz-image {
+  border-radius: 20px;
+}
+
+.dropzone .dz-preview .dz-image img {
+  width: 100%;
+  height: 100%;
+}
+
+.dropzone .dz-size {
+  visibility: hidden;
+}
+
+.dropzone .dz-progress {
+  display: none;
+}
