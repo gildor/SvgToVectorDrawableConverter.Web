@@ -10,7 +10,7 @@ import {DropzoneComponent} from './dropzone/dropzone.component';
 import {XmlViewComponent} from './xml-view/xml-view.component';
 import {CodeHighlightAutoredrawDirective} from './directives/code-highlight-autoredraw.directive';
 import {CardTextBeautifyPipe} from './pipes/card-text-beautify.pipe';
-import {SettingsService} from './settings.service';
+import {SettingsService} from './services/settings.service';
 import { MainComponent } from './main/main.component';
 
 @NgModule({

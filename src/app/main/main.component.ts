@@ -4,7 +4,7 @@ import * as base64js from 'base64-js';
 import * as JSZip from 'jszip';
 import * as FileSaver from 'file-saver';
 import {SendingEvent} from '../dropzone/SendingEvent';
-import {SettingsService} from '../settings.service';
+import {SettingsService} from '../services/settings.service';
 
 @Component({
   selector: 'app-main',
