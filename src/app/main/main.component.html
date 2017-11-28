@@ -13,7 +13,7 @@
 <clr-checkbox [clrInline]="true" [(clrChecked)]="settings.fixFillType" (clrCheckedChange)="dropzone.resubmit()"
               [clrDisabled]="!dropzone.enabled">
   Fix fill type
-  <a href="https://github.com/a-student/SvgToVectorDrawableConverter#not-supported-svg-features" target="_blank"
+  <a href="https://github.com/a-student/SvgToVectorDrawableConverter#not-supported-svg-features"
      class="tooltip tooltip-right">
     <clr-icon shape="help"></clr-icon>
     <span class="tooltip-content">
@@ -24,7 +24,7 @@
 
 <app-dropzone #dropzone (sending)="sending($event)" (restart)="restart()"></app-dropzone>
 
-<button class="btn btn-sm" (click)="dropzone.reset()" [disabled]="!dropzone.enabled">
+<button class="btn btn-sm" (click)="dropzone.reset()" [disabled]="!dropzone.canReset">
   <clr-icon shape="undo"></clr-icon>
   Reset
 </button>

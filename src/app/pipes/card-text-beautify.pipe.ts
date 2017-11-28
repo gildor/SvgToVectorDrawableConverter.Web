@@ -32,7 +32,7 @@ export class CardTextBeautifyPipe implements PipeTransform {
     const endChars = '-A-Z0-9~@#%&_+=|/';
     const middleChars = endChars + '?!,.;:';
     const regex = `\\bhttps?://[${middleChars}]*[${endChars}]`;
-    return text.replace(new RegExp(regex, 'gi'), url => `<a href="${url}" target="_blank">this</a>`);
+    return text.replace(new RegExp(regex, 'gi'), url => `<a href="${url}">this</a>`);
   }
 
   private replaceAll(text: string, search: string, replace: string): string {

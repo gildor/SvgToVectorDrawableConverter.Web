@@ -14,6 +14,7 @@ export class DropzoneComponent implements OnInit {
   @Output() sending = new EventEmitter<SendingEvent>();
   @Output() restart = new EventEmitter();
   enabled = true;
+  canReset = false;
 
   private _dropzone;
 
@@ -67,6 +68,7 @@ export class DropzoneComponent implements OnInit {
   private onAddedFile() {
     if (this.enabled) {
       this.enabled = false;
+      this.canReset = false;
 
       for (const element of this._dropzone.clickableElements) {
         element.classList.remove('dz-clickable');
@@ -83,6 +85,7 @@ export class DropzoneComponent implements OnInit {
   private onQueueComplete() {
     if (!this.enabled) {
       this.enabled = true;
+      this.canReset = true;
 
       for (const element of this._dropzone.clickableElements) {
         element.classList.add('dz-clickable');
@@ -106,6 +109,7 @@ export class DropzoneComponent implements OnInit {
   }
 
   reset() {
+    this.canReset = false;
     this.clear();
     this.restart.emit();
   }

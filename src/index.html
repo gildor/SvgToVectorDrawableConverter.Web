@@ -2,10 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>MyApp</title>
-  <base href="/">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="/" target="_blank">
+
+  <meta name="robots" content="noarchive">
+  <meta name="description" content="Online converter of SVG images to Android vector drawable XML resource files.">
+  <title>
+    SVG to Vector Drawable Converter – Convert SVG images to Android VectorDrawable XML resource files online
+  </title>
+  <script>
+    // Redirect to HTTP from HTTPS to allow requests to HTTP backend
+    if (location.protocol !== 'http:') {
+      location.href = 'http:' + location.href.substring(location.protocol.length);
+    }
+  </script>
 </head>
 <body>
   <app-root></app-root>
