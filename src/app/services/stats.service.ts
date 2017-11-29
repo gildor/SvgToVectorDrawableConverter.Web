@@ -8,10 +8,8 @@ export class StatsService {
 
   constructor() {
     if (!isDevMode()) {
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.innerHTML = this._yandexMetrikaCounterScript;
-      document.head.appendChild(script);
+      // tslint:disable-next-line
+      eval(this._yandexMetrikaCounterScript);
     }
   }
 
