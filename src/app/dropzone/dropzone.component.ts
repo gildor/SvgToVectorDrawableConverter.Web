@@ -1,6 +1,7 @@
 import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild, ViewEncapsulation} from '@angular/core';
 import * as Dropzone from 'dropzone';
 import {SendingEvent} from './SendingEvent';
+import {StatsService} from '../services/stats.service';
 
 @Component({
   selector: 'app-dropzone',
@@ -18,7 +19,7 @@ export class DropzoneComponent implements OnInit {
 
   private _dropzone;
 
-  constructor() {
+  constructor(private readonly _stats: StatsService) {
     Dropzone.autoDiscover = false;
   }
 
@@ -98,9 +99,13 @@ export class DropzoneComponent implements OnInit {
     this.sending.emit(new SendingEvent(xhr, formData));
   }
 
-  cancel() {
+  cancel(stat?: boolean) {
     for (const file of this._dropzone.files) {
       this._dropzone.cancelUpload(file);
+    }
+
+    if (stat) {
+      this._stats.reachGoal('click:cancel');
     }
   }
 
@@ -108,18 +113,26 @@ export class DropzoneComponent implements OnInit {
     this._dropzone.removeAllFiles(true);
   }
 
-  reset() {
+  reset(stat?: boolean) {
     this.canReset = false;
     this.clear();
     this.restart.emit();
+
+    if (stat) {
+      this._stats.reachGoal('click:reset');
+    }
   }
 
-  resubmit() {
+  resubmit(stat?: boolean) {
     this.cancel();
     setTimeout(() => {
       const files = this._dropzone.files;
       this.clear();
       this._dropzone.handleFiles(files);
+
+      if (stat) {
+        this._stats.reachGoal('click:resubmit');
+      }
     });
   }
 }

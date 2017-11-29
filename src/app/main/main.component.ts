@@ -5,6 +5,7 @@ import * as JSZip from 'jszip';
 import * as FileSaver from 'file-saver';
 import {SendingEvent} from '../dropzone/SendingEvent';
 import {SettingsService} from '../services/settings.service';
+import {StatsService} from '../services/stats.service';
 
 @Component({
   selector: 'app-main',
@@ -45,7 +46,7 @@ export class MainComponent implements OnInit {
 
   readonly progressStateEnum = ProgressState;
 
-  constructor(readonly settings: SettingsService, private readonly _zone: NgZone) {
+  constructor(readonly settings: SettingsService, private readonly _zone: NgZone, private readonly _stats: StatsService) {
     this.restart();
   }
 
@@ -64,6 +65,8 @@ export class MainComponent implements OnInit {
 
   private fixFillTypeClick(): void {
     this._zone.run(() => this.settings.fixFillType = true);
+
+    this._stats.reachGoal('click:fix-fill-type');
   }
 
   restart(): void {
@@ -84,6 +87,8 @@ export class MainComponent implements OnInit {
   }
 
   sending(event: SendingEvent): void {
+    this._stats.reachGoal('sending', {lib: this.settings.libId, fixFillType: this.settings.fixFillType});
+
     event.formData.append('lib', this.settings.libId);
     event.formData.append('fixFillType', this.settings.fixFillType ? 'on' : '');
 
@@ -116,6 +121,8 @@ export class MainComponent implements OnInit {
           this.cardTitle = 'Failed';
           this.canRetryConversion = true;
           this.progressState = ProgressState.Error;
+
+          this._stats.reachGoal('received:failed');
         } else {
           const data = base64js.toByteArray(event.xhr.response.substring(index + 1));
           this.zipBlob = new Blob([data], {type: 'application/zip'});
@@ -136,11 +143,15 @@ export class MainComponent implements OnInit {
                     this.singleFileXml = await zip.files[this.singleFileTitle].async('text');
                     this.xmlViewState = 'visible';
                 }
+
+                this._stats.reachGoal('received:good-zip', {fileCount: this.fileCount, state: ProgressState[this.progressState]});
               },
               (e: Error) => {
                 this.cardTitle = 'Corrupted ZIP';
                 this.canRetryConversion = true;
                 this.progressState = ProgressState.Error;
+
+                this._stats.reachGoal('received:corrupted-zip', {message: e.message});
               }
             );
         }
@@ -148,6 +159,8 @@ export class MainComponent implements OnInit {
         this.cardTitle = event.xhr.statusText;
         this.canRetryConversion = true;
         this.progressState = ProgressState.Error;
+
+        this._stats.reachGoal('received:status-error', {status: event.xhr.status, text: this.cardText});
       }
     });
     event.xhr.addEventListener('error', () => {
@@ -158,6 +171,8 @@ export class MainComponent implements OnInit {
       this.canRetryConversion = true;
       this.isProgressRunning = false;
       this.progressState = ProgressState.Error;
+
+      this._stats.reachGoal('received:network-error');
     });
     event.xhr.addEventListener('abort', () => {
       this.cardState = 'visible';
@@ -168,6 +183,8 @@ export class MainComponent implements OnInit {
       this.retryButtonText = 'Rerun';
       this.isProgressRunning = false;
       this.progressState = ProgressState.Aborted;
+
+      this._stats.reachGoal('received:aborted');
     });
   }
 
@@ -191,6 +208,8 @@ export class MainComponent implements OnInit {
 
   saveZip(): void {
     FileSaver.saveAs(this.zipBlob, 'res-drawable.zip');
+
+    this._stats.reachGoal('click:save-zip', {fileCount: this.fileCount, state: ProgressState[this.progressState]});
   }
 }
 

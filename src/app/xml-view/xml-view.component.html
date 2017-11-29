@@ -3,7 +3,7 @@
     <div class="card-title">{{title}}</div>
     <div class="card-text" *ngIf="hidePreview; else xmlPreview">
       Code preview is hidden because the text is too large.
-      <button class="btn btn-sm btn-warning-outline" (click)="hidePreview = false">
+      <button class="btn btn-sm btn-warning-outline" (click)="showPreview()">
         <clr-icon shape="eye"></clr-icon>
         Show anyway
       </button>

@@ -24,7 +24,7 @@
 
 <app-dropzone #dropzone (sending)="sending($event)" (restart)="restart()"></app-dropzone>
 
-<button class="btn btn-sm" (click)="dropzone.reset()" [disabled]="!dropzone.canReset">
+<button class="btn btn-sm" (click)="dropzone.reset(true)" [disabled]="!dropzone.canReset">
   <clr-icon shape="undo"></clr-icon>
   Reset
 </button>
@@ -49,7 +49,7 @@
       Abort
     </button>
     <button class="btn btn-primary"
-            (click)="dropzone.resubmit()" [hidden]="!canRetryConversion">
+            (click)="dropzone.resubmit(true)" [hidden]="!canRetryConversion">
       <clr-icon shape="refresh"></clr-icon>
       {{retryButtonText}}
     </button>
@@ -68,7 +68,7 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="abortConversionModalOpen = false">No, close this</button>
-    <button type="button" class="btn btn-danger" (click)="dropzone.cancel()">Yes, abort conversion</button>
+    <button type="button" class="btn btn-danger" (click)="dropzone.cancel(true)">Yes, abort conversion</button>
   </div>
 </clr-modal>
 

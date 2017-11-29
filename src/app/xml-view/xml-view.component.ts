@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {trigger, state, style, transition, animate} from '@angular/animations';
 import * as FileSaver from 'file-saver';
+import {StatsService} from '../services/stats.service';
 
 @Component({
   selector: 'app-xml-view',
@@ -33,10 +34,18 @@ export class XmlViewComponent {
 
   private _timeoutId;
 
-  constructor() { }
+  constructor(private readonly _stats: StatsService) { }
+
+  showPreview() {
+    this.hidePreview = false;
+
+    this._stats.reachGoal('click:xml-show-preview');
+  }
 
   saveToFile() {
     FileSaver.saveAs(new Blob([this._xml], {type: 'text/xml;charset=utf-8'}), this.title, true);
+
+    this._stats.reachGoal('click:xml-save-to-file');
   }
 
   copyCode() {
@@ -56,5 +65,7 @@ export class XmlViewComponent {
     this._timeoutId = setTimeout(() => {
       this.copyCodeAlertState = 'hidden';
     }, 2000);
+
+    this._stats.reachGoal('click:xml-copy-code');
   }
 }
