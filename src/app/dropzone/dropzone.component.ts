@@ -2,6 +2,7 @@ import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild, ViewEnca
 import * as Dropzone from 'dropzone';
 import {SendingEvent} from './SendingEvent';
 import {StatsService} from '../services/stats.service';
+import {SettingsService} from '../services/settings.service';
 
 @Component({
   selector: 'app-dropzone',
@@ -19,7 +20,7 @@ export class DropzoneComponent implements OnInit {
 
   private _dropzone;
 
-  constructor(private readonly _stats: StatsService) {
+  constructor(private readonly _settings: SettingsService, private readonly _stats: StatsService) {
     Dropzone.autoDiscover = false;
   }
 
@@ -36,7 +37,7 @@ export class DropzoneComponent implements OnInit {
     };
 
     this._dropzone = new Dropzone(ne, {
-      url: 'http://localhost:52455/api/svg2vd/v2',
+      url: this._settings.backendUrl,
       acceptedFiles: '.svg',
       uploadMultiple: true,
       maxFiles: 100,
