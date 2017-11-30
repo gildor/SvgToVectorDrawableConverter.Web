@@ -129,11 +129,18 @@ export class DropzoneComponent implements OnInit {
     setTimeout(() => {
       const files = this._dropzone.files;
       this.clear();
-      this._dropzone.handleFiles(files);
+      this._dropzone.handleFiles(files.map(this.deleteAllOwnProperties));
 
       if (stat) {
         this._stats.reachGoal('click:resubmit');
       }
     });
+  }
+
+  private deleteAllOwnProperties(obj: any): any {
+    for (const propertyName of Object.getOwnPropertyNames(obj)) {
+      delete obj[propertyName];
+    }
+    return obj;
   }
 }
