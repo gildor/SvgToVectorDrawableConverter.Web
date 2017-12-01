@@ -189,11 +189,20 @@ export class MainComponent implements OnInit {
   }
 
   private getCardText(response: string): string {
-    const index = response.indexOf('\0');
-    if (index < 0) {
+    if (!response) {
       return response;
     }
-    return response.substring(0, index);
+    let i = 0;
+    for (; i < response.length; i++) {
+      if (response[i] !== ' ') {
+        break;
+      }
+    }
+    let j = response.indexOf('\0', i);
+    if (j < 0) {
+      j = response.length;
+    }
+    return response.substring(i, j);
   }
 
   private updateProgressState(canSuccess: boolean): void {
