@@ -22,7 +22,7 @@
   </a>
 </clr-checkbox>
 
-<app-dropzone #dropzone (sending)="sending($event)" (restart)="restart()"></app-dropzone>
+<app-dropzone #dropzone (restart)="restart()" (converting)="converting($event)" (complete)="complete($event)"></app-dropzone>
 
 <button class="btn btn-sm" (click)="dropzone.reset(true)" [disabled]="!dropzone.canReset">
   <clr-icon shape="undo"></clr-icon>
@@ -39,24 +39,26 @@
         <div class="progress loop top"><progress value="0"></progress></div>
       </ng-template>
     </div>
-    <div class="card-title">{{cardTitle}}</div>
+    <div class="card-title" [innerHTML]="cardTitle"></div>
     <div class="card-text pre-wrap" [innerHTML]="cardText | cardTextBeautify" #cardTextContainer></div>
   </div>
-  <div class="card-footer" [hidden]="!canAbortConversion && !canRetryConversion && !zipBlob">
-    <button class="btn btn-sm btn-link"
-            (click)="abortConversionModalOpen = true" [hidden]="!canAbortConversion">
-      <clr-icon shape="times"></clr-icon>
-      Abort
+  <div class="card-footer" [hidden]="fileCount <= 0 && progressState !== progressStateEnum.Aborted && !isProgressRunning">
+    <button class="btn"
+            [class.btn-primary]="!isProgressRunning && progressState !== progressStateEnum.Aborted"
+            [class.btn-success]="progressState === progressStateEnum.Success"
+            (click)="saveZip()" [hidden]="fileCount <= 0">
+      <clr-icon shape="download"></clr-icon>
+      {{fileCount > 1 ? 'Save ZIP with ' + fileCount + ' vector drawables' : 'Save ZIP with 1 vector drawable'}}
     </button>
     <button class="btn btn-primary"
-            (click)="dropzone.resubmit(true)" [hidden]="!canRetryConversion">
+            (click)="dropzone.resubmit(true)" [hidden]="progressState !== progressStateEnum.Aborted">
       <clr-icon shape="refresh"></clr-icon>
-      {{retryButtonText}}
+      Rerun
     </button>
-    <button class="btn btn-primary" [class.btn-success]="progressState === progressStateEnum.Success"
-            (click)="saveZip()" [hidden]="!zipBlob">
-      <clr-icon shape="download"></clr-icon>
-      {{fileCount > 1 ? 'Save ZIP with ' + fileCount + ' vector drawables' : fileCount === 1 ? 'Save ZIP with 1 vector drawable' : 'Save ZIP'}}
+    <button class="btn btn-link"
+            (click)="abortConversionModalOpen = true" [hidden]="!isProgressRunning">
+      <clr-icon shape="times"></clr-icon>
+      Abort
     </button>
   </div>
 </div>
@@ -72,5 +74,4 @@
   </div>
 </clr-modal>
 
-<app-xml-view [title]="singleFileTitle" [xml]="singleFileXml" [@slideTop]="xmlViewState">
-</app-xml-view>
+<app-xml-view [title]="singleFileTitle" [xml]="singleFileXml" [@slideTop]="xmlViewState"></app-xml-view>

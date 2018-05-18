@@ -32,6 +32,6 @@
 
 :host ::ng-deep .card-text-error { }
 
-:host ::ng-deep .card-text-filename {
-  text-decoration: underline;
+:host ::ng-deep .card-filename {
+  text-shadow: 0 0 10px #909090;
 }

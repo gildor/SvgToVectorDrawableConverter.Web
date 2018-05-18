@@ -25,7 +25,7 @@ export class CardTextBeautifyPipe implements PipeTransform {
   }
 
   private recognizeFileNames(text: string): string {
-    return text.replace(/(] ?)(.+?\.svg)(:)/gi, '$1<span class="card-text-filename">$2</span>$3');
+    return text.replace(/(] ?)(.+?\.svg)(:)/gi, '$1<span class="card-filename">$2</span>$3');
   }
 
   private recognizeLinks(text: string): string {

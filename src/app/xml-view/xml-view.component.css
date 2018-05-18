@@ -7,3 +7,7 @@
 .resizable {
   resize: vertical;
 }
+
+.alert-item {
+  flex-wrap: nowrap;
+}

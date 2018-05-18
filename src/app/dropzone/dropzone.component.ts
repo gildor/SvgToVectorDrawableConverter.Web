@@ -1,8 +1,8 @@
-import {Component, ElementRef, EventEmitter, OnInit, Output, ViewChild, ViewEncapsulation} from '@angular/core';
+import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import * as Dropzone from 'dropzone';
-import {SendingEvent} from './SendingEvent';
-import {StatsService} from '../services/stats.service';
-import {SettingsService} from '../services/settings.service';
+import { StatsService } from '../services/stats.service';
+import { ConverterService } from '../conversion/converter.service';
+import { ConvertRequest } from '../conversion/ConvertRequest';
 
 @Component({
   selector: 'app-dropzone',
@@ -13,14 +13,18 @@ import {SettingsService} from '../services/settings.service';
 export class DropzoneComponent implements OnInit {
   @ViewChild('dropzone') dropzoneView: ElementRef;
 
-  @Output() sending = new EventEmitter<SendingEvent>();
+  @Output() converting = new EventEmitter<ConvertRequest>();
   @Output() restart = new EventEmitter();
+  @Output() complete = new EventEmitter<boolean>();
   enabled = true;
   canReset = false;
 
   private _dropzone;
 
-  constructor(private readonly _settings: SettingsService, private readonly _stats: StatsService) {
+  constructor(
+    private readonly _converter: ConverterService,
+    private readonly _stats: StatsService
+  ) {
     Dropzone.autoDiscover = false;
   }
 
@@ -37,17 +41,14 @@ export class DropzoneComponent implements OnInit {
     };
 
     this._dropzone = new Dropzone(ne, {
-      url: this._settings.backendUrl,
+      url: '.',
       acceptedFiles: '.svg',
-      uploadMultiple: true,
-      maxFiles: 100,
-      maxFilesize: 9,
-      parallelUploads: Number.POSITIVE_INFINITY,
-      timeout: 0
+      parallelUploads: 1,
+      dictUploadCanceled: 'Aborted.'
     });
+    this._dropzone._uploadData = this.uploadData.bind(this);
     this._dropzone.on('addedfile', this.onAddedFile.bind(this));
     this._dropzone.on('queuecomplete', this.onQueueComplete.bind(this));
-    this._dropzone.on('sendingmultiple', this.onSendingMultiple.bind(this));
 
     // Make the whole page to be droppable
     this._dropzone.removeEventListeners();
@@ -67,6 +68,29 @@ export class DropzoneComponent implements OnInit {
     document.ondrop = () => false;
   }
 
+  private uploadData(files) {
+    if (files.length != 1) throw new Error('Application error.');
+    const file = files[0];
+    const request = new ConvertRequest(file);
+    const xhr: any = {};
+    file.xhr = xhr;
+    xhr.abort = () => {
+      request.abort.emit();
+      file.abort = true;
+    };
+    request.response.subscribe(() => {
+      xhr.readyState = XMLHttpRequest.DONE;
+      xhr.responseType = 'arraybuffer';
+      xhr.status = 200;
+      this._dropzone._finishedUploading(files, xhr);
+    });
+    request.error.subscribe(message =>
+      this._dropzone._handleUploadError(files, xhr, message)
+    );
+    this.converting.emit(request);
+    this._converter.convert(request);
+  }
+
   private onAddedFile() {
     if (this.enabled) {
       this.enabled = false;
@@ -80,6 +104,7 @@ export class DropzoneComponent implements OnInit {
       while (this._dropzone.files.length > 1) {
         this._dropzone.removeFile(this._dropzone.files[0]);
       }
+
       this.restart.emit();
     }
   }
@@ -93,16 +118,14 @@ export class DropzoneComponent implements OnInit {
         element.classList.add('dz-clickable');
       }
       this._dropzone.setupEventListeners();
+
+      this.complete.emit(this._dropzone.files.some(x => x.abort));
     }
   }
 
-  private onSendingMultiple(files, xhr, formData) {
-    this.sending.emit(new SendingEvent(xhr, formData));
-  }
-
   cancel(stat?: boolean) {
-    for (const file of this._dropzone.files) {
-      this._dropzone.cancelUpload(file);
+    for (let i = this._dropzone.files.length - 1; i >= 0; i--) {
+      this._dropzone.cancelUpload(this._dropzone.files[i]);
     }
 
     if (stat) {

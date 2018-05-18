@@ -33,6 +33,7 @@
     "prismjs": "^1.8.4",
     "rxjs": "^6.1.0",
     "rxjs-compat": "^6.1.0",
+    "shortid": "^2.2.8",
     "zone.js": "^0.8.14"
   },
   "devDependencies": {

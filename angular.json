@@ -17,7 +17,8 @@
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
             "assets": [
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*", "input": "src/converter", "output": "/" }
             ],
             "styles": [
               "src/styles.css",
