@@ -5,6 +5,8 @@ import * as FileSaver from 'file-saver';
 import { SettingsService } from '../services/settings.service';
 import { StatsService } from '../services/stats.service';
 import { ConvertRequest } from '../conversion/ConvertRequest';
+import { ReportIssueService } from '../report-issue/report-issue.service';
+import { DropzoneComponent } from '../dropzone/dropzone.component';
 
 @Component({
   selector: 'app-main',
@@ -19,7 +21,7 @@ import { ConvertRequest } from '../conversion/ConvertRequest';
   ]
 })
 export class MainComponent implements OnInit {
-  @ViewChild('cardTextContainer') cardTextContainer: ElementRef;
+  @ViewChild('dropzone') dropzone: DropzoneComponent;
 
   readonly libs = [
     { id: '', text: 'Android 5.0+' },
@@ -42,8 +44,17 @@ export class MainComponent implements OnInit {
 
   readonly progressStateEnum = ProgressState;
 
-  constructor(readonly settings: SettingsService, private readonly _zone: NgZone, private readonly _stats: StatsService) {
+  private readonly _nativeEventsHandler: NativeEventsHandler;
+
+  constructor(
+    readonly settings: SettingsService,
+    private readonly _stats: StatsService,
+    element: ElementRef,
+    zone: NgZone,
+    reportIssueService: ReportIssueService
+  ) {
     this.restart();
+    this._nativeEventsHandler = new NativeEventsHandler(settings, _stats, element, zone, reportIssueService);
   }
 
   libText(): string {
@@ -56,13 +67,7 @@ export class MainComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.cardTextContainer.nativeElement.fixFillTypeClick = this.fixFillTypeClick.bind(this);
-  }
-
-  private fixFillTypeClick() {
-    this._zone.run(() => this.settings.fixFillType = true);
-
-    this._stats.reachGoal('click:fix-fill-type');
+    this._nativeEventsHandler.init(this.dropzone);
   }
 
   private setProgressState(value: ProgressState) {
@@ -98,19 +103,20 @@ export class MainComponent implements OnInit {
     this.cardText += '.';
     this.isProgressRunning = true;
 
-    request.response.subscribe(x => {
-      this.zip.file(request.xmlName(), x.output);
-      this.fileCount++;
-      if (x.warnings.length > 0) {
-        this.cardText += `\n[Warning(s)] ${request.svgName()}: ${x.warnings.join('\n')}\n`;
-        this.setProgressState(ProgressState.Warning);
+    request.response.subscribe(
+      x => {
+        this.zip.file(request.xmlName(), x.output);
+        this.fileCount++;
+        if (x.warnings.length > 0) {
+          this.cardText += `\n[Warning(s)] ${request.svgName()}: ${x.warnings.join('\n')}\n`;
+          this.setProgressState(ProgressState.Warning);
+        }
+      },
+      x => {
+        this.cardText += `\n[Error] ${request.svgName()}: ${x}\n`;
+        this.setProgressState(ProgressState.Error);
       }
-    });
-
-    request.error.subscribe(x => {
-      this.cardText += `\n[Error] ${request.svgName()}: ${x}\n`;
-      this.setProgressState(ProgressState.Error);
-    });
+    );
   }
 
   async complete(abort: boolean) {
@@ -123,7 +129,7 @@ export class MainComponent implements OnInit {
 
       this._stats.reachGoal('received:aborted');
     } else {
-      this.cardTitle = this.fileCount > 0 ? 'Done' : 'Error';
+      this.cardTitle = this.fileCount ? 'Done' : 'Error';
       this.setProgressState(ProgressState.Success);
 
       if (this.fileCount === 1) {
@@ -150,4 +156,53 @@ enum ProgressState {
   Warning,
   Error,
   Aborted
+}
+
+class NativeEventsHandler {
+  constructor(
+    private readonly _settings: SettingsService,
+    private readonly _stats: StatsService,
+    element: ElementRef,
+    private readonly _zone: NgZone,
+    private readonly _reportIssueService: ReportIssueService
+  ) {
+    // ReSharper disable Html.EventNotResolved
+    element.nativeElement.addEventListener('fixFillTypeClick', this.fixFillTypeClick.bind(this));
+    element.nativeElement.addEventListener('openIssueClick', e => this.openIssueClick(e.detail));
+    // ReSharper restore Html.EventNotResolved
+  }
+
+  private fixFillTypeClick() {
+    this._zone.run(() => this._settings.fixFillType = true);
+
+    this._stats.reachGoal('click:fix-fill-type');
+  }
+
+  private openIssueClick(svgName?: string) {
+    this._zone.run(() => {
+      if (!svgName) {
+        svgName = this._lastSuccessSvgName;
+      }
+      const file = this._svgNameToFileMap.get(svgName);
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => this._reportIssueService.openIssue(svgName, reader.result);
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  private readonly _svgNameToFileMap = new Map<string, File>();
+  private _lastSuccessSvgName: string;
+
+  init(dropzone: DropzoneComponent) {
+    dropzone.restart.subscribe(() => {
+      this._svgNameToFileMap.clear();
+      this._lastSuccessSvgName = null;
+    });
+    dropzone.converting.subscribe(x => {
+      this._svgNameToFileMap.set(x.svgName(), x.inputFile);
+      x.response.subscribe(() => this._lastSuccessSvgName = x.svgName());
+    });
+  }
 }

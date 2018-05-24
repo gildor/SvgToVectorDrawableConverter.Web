@@ -16,12 +16,11 @@ export class ConverterService {
       const request = this._currentRequest;
       if (!request || e.data.id !== request.id) return;
       this._currentRequest = null;
-      if (request) {
-        if (e.data.error) {
-          request.error.emit(e.data.error);
-        } else {
-          request.response.emit({ 'output': e.data.output, 'warnings': e.data.warnings });
-        }
+      if (e.data.error) {
+        request.response.error(e.data.error);
+      } else {
+        request.response.next({ 'output': e.data.output, 'warnings': e.data.warnings });
+        request.response.complete();
       }
     };
     this._worker.onerror = e => {
@@ -30,7 +29,7 @@ export class ConverterService {
       this._worker.terminate();
       this.init();
       if (request) {
-        request.error.emit(e.message);
+        request.response.error(e.message);
       }
       e.preventDefault();
     };

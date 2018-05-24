@@ -1,0 +1,48 @@
+<clr-alert *ngFor="let x of reportIssueViewModels" [clrAlertType]="x.alertType" [(clrAlertClosed)]="x.alertClosed">
+  <div class="alert-item">
+    <span class="alert-text">
+      <span [innerHTML]="x.alertText"></span>
+      {{x.countdownText}}
+    </span>
+    <div class="alert-actions">
+      <a class="alert-action cursor-pointer" (click)="x.retry()" [hidden]="!x.canRetry">Retry now</a>
+    </div>
+  </div>
+</clr-alert>
+<div style="height: 0.5rem"></div>
+
+<clr-modal [(clrModalOpen)]="modalOpen">
+  <h3 class="modal-title">Report conversion issue</h3>
+  <div class="modal-body">
+    <clr-alert [clrAlertClosable]="false">
+      <div class="alert-item">
+        <span class="alert-text">
+          If you have a GitHub account, you can <a href="https://github.com/a-student/SvgToVectorDrawableConverter.Web/issues">create an issue</a> personally.
+          This form posts the issue under an anonymous account.
+        </span>
+      </div>
+    </clr-alert>
+    <div class="form compact">
+      <div class="form-group">
+        <label>SVG name</label>
+        <span class="nowrap card-filename">{{svgName}}</span>
+      </div>
+      <div class="form-group">
+        <label>SVG content</label>
+        <span class="nowrap">{{svgContent}}</span>
+      </div>
+      <textarea rows="3" placeholder="Optionally you can provide additional information: what's wrong with the conversion result, your name and email, etc." [(ngModel)]="additionalInformation"></textarea>
+      <span [class.warning-text]="additionalInformation">* All fields will be publicly available.</span>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="modalOpen = false">
+      <clr-icon shape="times"></clr-icon>
+      Cancel
+    </button>
+    <button type="button" class="btn btn-primary" (click)="reportIssue()">
+      <clr-icon shape="bug"></clr-icon>
+      Report issue
+    </button>
+  </div>
+</clr-modal>

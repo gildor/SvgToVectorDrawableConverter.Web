@@ -1,24 +1,24 @@
-import {Component, Input} from '@angular/core';
-import {trigger, state, style, transition, animate} from '@angular/animations';
-import * as FileSaver from 'file-saver';
-import {StatsService} from '../services/stats.service';
+import { Component, Input, ElementRef } from "@angular/core";
+import { trigger, state, style, transition, animate } from "@angular/animations";
+import * as FileSaver from "file-saver";
+import { StatsService } from "../services/stats.service";
 
 @Component({
-  selector: 'app-xml-view',
-  templateUrl: './xml-view.component.html',
-  styleUrls: ['./xml-view.component.css'],
+  selector: "app-xml-view",
+  templateUrl: "./xml-view.component.html",
+  styleUrls: ["./xml-view.component.css"],
   animations: [
-    trigger('alertState', [
-      state('*, hidden', style({opacity: 0})),
-      state('visible', style({opacity: 1})),
-      transition('* => *', animate(200))
+    trigger("alertState", [
+      state("*, hidden", style({ opacity: 0 })),
+      state("visible", style({ opacity: 1 })),
+      transition("* => *", animate(200))
     ])
   ]
 })
 export class XmlViewComponent {
   @Input() title: string;
   hidePreview: boolean;
-  copyCodeAlertState = '';
+  copyCodeAlertState = "";
 
   private _xml: string;
 
@@ -34,38 +34,45 @@ export class XmlViewComponent {
 
   private _timeoutId;
 
-  constructor(private readonly _stats: StatsService) { }
+  constructor(
+    private readonly _stats: StatsService,
+    private readonly _element: ElementRef
+  ) { }
 
   showPreview() {
     this.hidePreview = false;
 
-    this._stats.reachGoal('click:xml-show-preview');
+    this._stats.reachGoal("click:xml-show-preview");
   }
 
   saveToFile() {
-    FileSaver.saveAs(new Blob([this._xml], {type: 'text/xml;charset=utf-8'}), this.title, true);
+    FileSaver.saveAs(new Blob([this._xml], { type: "text/xml;charset=utf-8" }), this.title, true);
 
-    this._stats.reachGoal('click:xml-save-to-file');
+    this._stats.reachGoal("click:xml-save-to-file");
   }
 
   copyCode() {
-    const ta = document.createElement('textarea');
-    ta.style.position = 'fixed';
-    ta.style.left = '0';
-    ta.style.top = '0';
-    ta.style.opacity = '0';
+    const ta = document.createElement("textarea");
+    ta.style.position = "fixed";
+    ta.style.left = "0";
+    ta.style.top = "0";
+    ta.style.opacity = "0";
     ta.value = this._xml;
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand('copy');
+    document.execCommand("copy");
     document.body.removeChild(ta);
 
     clearTimeout(this._timeoutId);
-    this.copyCodeAlertState = 'visible';
+    this.copyCodeAlertState = "visible";
     this._timeoutId = setTimeout(() => {
-      this.copyCodeAlertState = 'hidden';
+      this.copyCodeAlertState = "hidden";
     }, 2000);
 
-    this._stats.reachGoal('click:xml-copy-code');
+    this._stats.reachGoal("click:xml-copy-code");
+  }
+
+  openIssue() {
+    this._element.nativeElement.dispatchEvent(new Event("openIssueClick", { "bubbles": true }));
   }
 }

@@ -1,5 +1,5 @@
-import {Pipe, PipeTransform, SecurityContext} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
+import { Pipe, PipeTransform, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Pipe({
   name: 'cardTextBeautify'
@@ -18,14 +18,20 @@ export class CardTextBeautifyPipe implements PipeTransform {
     text = this.replaceAll(text, '[Warning(s)]', '<span class="label label-warning card-text-warning">Warning</span>');
     text = this.replaceAll(text, '[Error]', '<span class="label label-danger card-text-error">Error</span>');
     text = this.replaceAll(text, 'Try specifying the --fix-fill-type option.', 'Restart the conversion and try to ' +
-      '<button class="btn btn-sm btn-link" onclick="parentNode.fixFillTypeClick()">Fix fill type</button>');
+      '<button class="btn btn-sm btn-link" style="margin: 0" onclick="' + this.dispatchEventCode('fixFillTypeClick', 'null') + '">Fix fill type</button>.');
     text = this.replaceAll(text, 'Failure due to the --fix-fill-type option.', 'Failure due to the <strong>Fix fill type</strong> option.');
 
     return this._sanitizer.bypassSecurityTrustHtml(text);
   }
 
   private recognizeFileNames(text: string): string {
-    return text.replace(/(] ?)(.+?\.svg)(:)/gi, '$1<span class="card-filename">$2</span>$3');
+    return text.replace(/(] ?)(.+?\.svg)(:)/gi, '$1<span class="card-filename">$2</span> ' +
+      '<button class="btn btn-sm btn-link" style="margin: 0" onclick="' + this.dispatchEventCode('openIssueClick', '\'$2\'') + '" title="Report conversion issue">' +
+      '<clr-icon shape="bug"></clr-icon></button>$3');
+  }
+
+  private dispatchEventCode(name: string, detail: string) {
+    return `dispatchEvent(new CustomEvent('${name}', { 'bubbles': true, 'detail': ${detail} }))`;
   }
 
   private recognizeLinks(text: string): string {

@@ -75,17 +75,18 @@ export class DropzoneComponent implements OnInit {
     const xhr: any = {};
     file.xhr = xhr;
     xhr.abort = () => {
-      request.abort.emit();
+      request.abort.next();
       file.abort = true;
     };
-    request.response.subscribe(() => {
-      xhr.readyState = XMLHttpRequest.DONE;
-      xhr.responseType = 'arraybuffer';
-      xhr.status = 200;
-      this._dropzone._finishedUploading(files, xhr);
-    });
-    request.error.subscribe(message =>
-      this._dropzone._handleUploadError(files, xhr, message)
+    request.response.subscribe(
+      () => {
+        xhr.readyState = XMLHttpRequest.DONE;
+        xhr.responseType = 'arraybuffer';
+        xhr.status = 200;
+        this._dropzone._finishedUploading(files, xhr);
+      },
+      message =>
+        this._dropzone._handleUploadError(files, xhr, message)
     );
     this.converting.emit(request);
     this._converter.convert(request);

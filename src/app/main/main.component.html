@@ -1,3 +1,4 @@
+<app-report-issue></app-report-issue>
 <clr-dropdown>
   <button type="button" class="btn btn-link" clrDropdownTrigger [disabled]="!dropzone.enabled">
     {{libText()}}
@@ -9,7 +10,6 @@
     </button>
   </clr-dropdown-menu>
 </clr-dropdown>
-
 <clr-checkbox [clrInline]="true" [(clrChecked)]="settings.fixFillType" (clrCheckedChange)="dropzone.resubmit()"
               [clrDisabled]="!dropzone.enabled">
   Fix fill type
@@ -21,14 +21,11 @@
     </span>
   </a>
 </clr-checkbox>
-
 <app-dropzone #dropzone (restart)="restart()" (converting)="converting($event)" (complete)="complete($event)"></app-dropzone>
-
 <button class="btn btn-sm" (click)="dropzone.reset(true)" [disabled]="!dropzone.canReset">
   <clr-icon shape="undo"></clr-icon>
   Reset
 </button>
-
 <div class="card" [@slideTop]="cardState">
   <div class="card-block">
     <div class="progress-{{progressStateEnum[progressState] | lowercase}}">
@@ -40,7 +37,7 @@
       </ng-template>
     </div>
     <div class="card-title" [innerHTML]="cardTitle"></div>
-    <div class="card-text pre-wrap" [innerHTML]="cardText | cardTextBeautify" #cardTextContainer></div>
+    <div class="card-text pre-wrap" [innerHTML]="cardText | cardTextBeautify"></div>
   </div>
   <div class="card-footer" [hidden]="fileCount <= 0 && progressState !== progressStateEnum.Aborted && !isProgressRunning">
     <button class="btn"
@@ -62,7 +59,6 @@
     </button>
   </div>
 </div>
-
 <clr-modal [(clrModalOpen)]="abortConversionModalOpen">
   <h3 class="modal-title">Abort conversion</h3>
   <div class="modal-body">
@@ -73,5 +69,4 @@
     <button type="button" class="btn btn-danger" (click)="dropzone.cancel(true)">Yes, abort conversion</button>
   </div>
 </clr-modal>
-
 <app-xml-view [title]="singleFileTitle" [xml]="singleFileXml" [@slideTop]="xmlViewState"></app-xml-view>

@@ -15,13 +15,17 @@
   </div>
   <div class="card-footer">
     <div class="flex">
-      <button class="btn btn-link" (click)="saveToFile()">
+      <button class="btn btn-primary" (click)="saveToFile()">
         <clr-icon shape="export"></clr-icon>
         Save to file
       </button>
-      <button class="btn btn-link" (click)="copyCode()">
+      <button class="btn btn-primary" (click)="copyCode()">
         <clr-icon shape="copy"></clr-icon>
         Copy code
+      </button>
+      <button class="btn btn-link" (click)="openIssue()">
+        <clr-icon shape="bug"></clr-icon>
+        Report issue
       </button>
       <clr-alert [clrAlertSizeSmall]="true" [clrAlertClosable]="false" [@alertState]="copyCodeAlertState">
         <div class="alert-item">
