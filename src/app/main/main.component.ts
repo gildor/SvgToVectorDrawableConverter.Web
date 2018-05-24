@@ -92,7 +92,7 @@ export class MainComponent implements OnInit {
 
   converting(request: ConvertRequest) {
     if (!this.cardState) {
-      this._stats.reachGoal('sending', { lib: this.settings.libId, fixFillType: this.settings.fixFillType });
+      this._stats.event({ "main.converting:lib": this.settings.libId, "main.converting:fix-fill-type": this.settings.fixFillType });
     }
 
     request.lib = this.settings.libId;
@@ -126,8 +126,6 @@ export class MainComponent implements OnInit {
     if (abort) {
       this.cardTitle = 'Aborted';
       this.setProgressState(ProgressState.Aborted);
-
-      this._stats.reachGoal('received:aborted');
     } else {
       this.cardTitle = this.fileCount ? 'Done' : 'Error';
       this.setProgressState(ProgressState.Success);
@@ -138,15 +136,17 @@ export class MainComponent implements OnInit {
         this.xmlViewState = 'visible';
       }
 
-      this._stats.reachGoal('received:good-zip', { fileCount: this.fileCount, state: ProgressState[this.progressState] });
+      this._stats.event({ "main.complete.success:file-count": this.fileCount });
     }
+
+    this._stats.event({ "main.complete:abort": abort, "main.complete:state": ProgressState[this.progressState] });
   }
 
   async saveZip() {
-    const content = await this.zip.generateAsync({ type: 'blob' })
+    const content = await this.zip.generateAsync({ type: 'blob' });
     FileSaver.saveAs(content, 'res-drawable.zip');
 
-    this._stats.reachGoal('click:save-zip', { fileCount: this.fileCount, state: ProgressState[this.progressState] });
+    this._stats.event({ "main.save-zip:file-count": this.fileCount });
   }
 }
 
@@ -175,10 +175,12 @@ class NativeEventsHandler {
   private fixFillTypeClick() {
     this._zone.run(() => this._settings.fixFillType = true);
 
-    this._stats.reachGoal('click:fix-fill-type');
+    this._stats.event({ "main.fix-fill-type-click": this._stats.noValue });
   }
 
   private openIssueClick(svgName?: string) {
+    this._stats.event({ "main.open-issue-click:svg-name": svgName ? true : false });
+
     this._zone.run(() => {
       if (!svgName) {
         svgName = this._lastSuccessSvgName;

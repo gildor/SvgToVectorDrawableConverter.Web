@@ -69,7 +69,7 @@ export class DropzoneComponent implements OnInit {
   }
 
   private uploadData(files) {
-    if (files.length != 1) throw new Error('Application error.');
+    if (files.length !== 1) throw new Error('Application error.');
     const file = files[0];
     const request = new ConvertRequest(file);
     const xhr: any = {};
@@ -107,6 +107,8 @@ export class DropzoneComponent implements OnInit {
       }
 
       this.restart.emit();
+
+      this._stats.event({ "dropzone.added-files": this._stats.noValue });
     }
   }
 
@@ -120,7 +122,10 @@ export class DropzoneComponent implements OnInit {
       }
       this._dropzone.setupEventListeners();
 
-      this.complete.emit(this._dropzone.files.some(x => x.abort));
+      const abort = this._dropzone.files.some(x => x.abort);
+      this.complete.emit(abort);
+
+      this._stats.event({ "dropzone.queue-complete:files-length": this._dropzone.files.length, "dropzone.queue-complete:abort": abort });
     }
   }
 
@@ -130,7 +135,7 @@ export class DropzoneComponent implements OnInit {
     }
 
     if (stat) {
-      this._stats.reachGoal('click:cancel');
+      this._stats.event({ "dropzone.cancel": this._stats.noValue });
     }
   }
 
@@ -138,14 +143,12 @@ export class DropzoneComponent implements OnInit {
     this._dropzone.removeAllFiles(true);
   }
 
-  reset(stat?: boolean) {
+  reset() {
     this.canReset = false;
     this.clear();
     this.restart.emit();
 
-    if (stat) {
-      this._stats.reachGoal('click:reset');
-    }
+    this._stats.event({ "dropzone.reset": this._stats.noValue });
   }
 
   resubmit(stat?: boolean) {
@@ -156,7 +159,7 @@ export class DropzoneComponent implements OnInit {
       this._dropzone.handleFiles(files.map(this.deleteAllOwnProperties));
 
       if (stat) {
-        this._stats.reachGoal('click:resubmit');
+        this._stats.event({ "dropzone.resubmit": this._stats.noValue });
       }
     });
   }

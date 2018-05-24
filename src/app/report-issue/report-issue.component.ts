@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ReportIssueService } from "./report-issue.service";
 import { ReportIssueRequest } from "./ReportIssueRequest";
+import { StatsService } from "../services/stats.service";
 
 @Component({
   selector: "app-report-issue",
@@ -15,7 +16,10 @@ export class ReportIssueComponent implements OnInit {
 
   readonly reportIssueViewModels = new Array<ReportIssueViewModel>();
 
-  constructor(private readonly _reportIssueService: ReportIssueService) {
+  constructor(
+    private readonly _reportIssueService: ReportIssueService,
+    private readonly _stats: StatsService
+  ) {
     _reportIssueService.open().subscribe(x => {
       this.svgName = x.svgName;
       this.svgContent = x.svgContent;
@@ -23,7 +27,7 @@ export class ReportIssueComponent implements OnInit {
     });
 
     _reportIssueService.report().subscribe(x => {
-      const reportIssueViewModel = new ReportIssueViewModel(x, () => this.reportIssueViewModels.remove(reportIssueViewModel));
+      const reportIssueViewModel = new ReportIssueViewModel(x, () => this.reportIssueViewModels.remove(reportIssueViewModel), _stats);
       this.reportIssueViewModels.push(reportIssueViewModel);
     });
   }
@@ -35,6 +39,8 @@ export class ReportIssueComponent implements OnInit {
   reportIssue() {
     this.modalOpen = false;
     this._reportIssueService.reportIssue(this.svgName, this.svgContent, this.additionalInformation);
+
+    this._stats.event({ "report-issue.report-issue:additional-information": this.additionalInformation ? true : false });
   }
 }
 
@@ -45,7 +51,11 @@ class ReportIssueViewModel {
   canRetry: boolean;
   private _closed = true;
 
-  constructor(private readonly _request: ReportIssueRequest, private readonly _done: () => void) {
+  constructor(
+    private readonly _request: ReportIssueRequest,
+    private readonly _done: () => void,
+    private readonly _stats: StatsService
+  ) {
     const open = this.open.bind(this);
     _request.error().subscribe(open, null, open);
   }
@@ -109,5 +119,7 @@ class ReportIssueViewModel {
 
   retry() {
     this._request.load();
+
+    this._stats.event({ "report-issue.retry": this._stats.noValue });
   }
 }

@@ -22,7 +22,7 @@
   </a>
 </clr-checkbox>
 <app-dropzone #dropzone (restart)="restart()" (converting)="converting($event)" (complete)="complete($event)"></app-dropzone>
-<button class="btn btn-sm" (click)="dropzone.reset(true)" [disabled]="!dropzone.canReset">
+<button class="btn btn-sm" (click)="dropzone.reset()" [disabled]="!dropzone.canReset">
   <clr-icon shape="undo"></clr-icon>
   Reset
 </button>

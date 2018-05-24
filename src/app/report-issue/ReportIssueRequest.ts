@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from "@angular/common/http";
 import { Subject } from "rxjs";
 import { SettingsService } from "../services/settings.service";
+import { StatsService } from "../services/stats.service";
 
 export class ReportIssueRequest {
   constructor(
@@ -8,7 +9,8 @@ export class ReportIssueRequest {
     readonly svgContent: string,
     readonly additionalInformation: string,
     private readonly _httpClient: HttpClient,
-    private readonly _settings: SettingsService
+    private readonly _settings: SettingsService,
+    private readonly _stats: StatsService
   ) { }
 
   issueUrl: string | null;
@@ -48,6 +50,8 @@ export class ReportIssueRequest {
 
           this.loading = false;
           this._error.complete();
+
+          this._stats.event({ "report-issue.load:status": "success" });
         },
         (e: HttpErrorResponse) => {
           this.issueUrl = null;
@@ -61,6 +65,8 @@ export class ReportIssueRequest {
           this.loading = false;
           this._timeoutId = setTimeout(this.load.bind(this), this.autoRetryAt - now);
           this._error.next();
+
+          this._stats.event({ "report-issue.load:status": e.status });
         });
   }
 

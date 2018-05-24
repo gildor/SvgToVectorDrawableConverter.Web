@@ -42,13 +42,13 @@ export class XmlViewComponent {
   showPreview() {
     this.hidePreview = false;
 
-    this._stats.reachGoal("click:xml-show-preview");
+    this._stats.event({ "xml-view.show-preview": this._stats.noValue });
   }
 
   saveToFile() {
     FileSaver.saveAs(new Blob([this._xml], { type: "text/xml;charset=utf-8" }), this.title, true);
 
-    this._stats.reachGoal("click:xml-save-to-file");
+    this._stats.event({ "xml-view.save-to-file": this._stats.noValue });
   }
 
   copyCode() {
@@ -69,10 +69,12 @@ export class XmlViewComponent {
       this.copyCodeAlertState = "hidden";
     }, 2000);
 
-    this._stats.reachGoal("click:xml-copy-code");
+    this._stats.event({ "xml-view.copy-code": this._stats.noValue });
   }
 
   openIssue() {
     this._element.nativeElement.dispatchEvent(new Event("openIssueClick", { "bubbles": true }));
+
+    this._stats.event({ "xml-view.open-issue": this._stats.noValue });
   }
 }

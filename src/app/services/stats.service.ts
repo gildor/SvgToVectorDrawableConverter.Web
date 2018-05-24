@@ -1,19 +1,17 @@
-import {Injectable, isDevMode} from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 
 @Injectable()
 export class StatsService {
-  // tslint:disable-next-line
-  private readonly _yandexMetrikaCounterScript = '(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter46821447 = new Ya.Metrika({ id:46821447, clickmap:true, trackLinks:true, accurateTrackBounce:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");';
-  private readonly _yaCounterName = 'yaCounter46821447';
+  private readonly _yandexMetrikaCounterScript = '(function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter49001738 = new Ya.Metrika({ id:49001738, clickmap:true, trackLinks:true, accurateTrackBounce:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks");';
+  private readonly _yaCounterName = 'yaCounter49001738';
 
   constructor() {
     if (!isDevMode()) {
-      // tslint:disable-next-line
       eval(this._yandexMetrikaCounterScript);
     }
   }
 
-  private safeInvoke(func: string, ...args: any[]): any {
+  private safeInvoke(func: string, ...args: any[]) {
     if (isDevMode()) {
       console.log(func, JSON.stringify(args, null, 2));
     }
@@ -22,7 +20,9 @@ export class StatsService {
     }
   }
 
-  reachGoal(target: string, params?: Object): void {
-    this.safeInvoke('reachGoal', target, params);
+  readonly noValue = 'No value';
+
+  event(params: Object) {
+    this.safeInvoke('reachGoal', 'event', params);
   }
 }

@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { ReportIssueRequest } from "./ReportIssueRequest";
 import { SettingsService } from "../services/settings.service";
+import { StatsService } from "../services/stats.service";
 import "rxjs/add/operator/finally";
 
 @Injectable({
@@ -24,11 +25,14 @@ export class ReportIssueService {
 
   openIssue(svgName: string, svgContent: string) {
     this._open.next({ svgName, svgContent });
+
+    this._stats.event({ "report-issue.open-issue": this._stats.noValue });
   }
 
   constructor(
     private readonly _httpClient: HttpClient,
-    private readonly _settings: SettingsService
+    private readonly _settings: SettingsService,
+    private readonly _stats: StatsService
   ) { }
 
   reportPendingIssues() {
@@ -44,7 +48,7 @@ export class ReportIssueService {
   }
 
   reportIssue(svgName: string, svgContent: string, additionalInformation: string) {
-    const request = new ReportIssueRequest(svgName, svgContent, additionalInformation, this._httpClient, this._settings);
+    const request = new ReportIssueRequest(svgName, svgContent, additionalInformation, this._httpClient, this._settings, this._stats);
     this._pendingRequests.push(request);
     this.savePendingRequests();
     request.error()
